@@ -133,6 +133,10 @@ export async function listCustomerHistory(customerId: string) {
   return BookingModel.find({ customerId }).sort({ createdAt: -1 });
 }
 
+export async function listDriverHistory(driverId: string) {
+  return BookingModel.find({ claimedByDriverId: driverId }).sort({ updatedAt: -1 });
+}
+
 /**
  * Ride-requests feed for a driver: must be ONLINE with a location snapshot.
  * Returns open bookings matching vehicle type, scheduled in the future, unclaimed,

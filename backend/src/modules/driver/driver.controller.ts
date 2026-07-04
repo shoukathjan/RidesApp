@@ -1,6 +1,6 @@
 import { DriverStatus } from '@useme/shared';
 import { Request, Response } from 'express';
-import { getActiveRideForDriver } from '../booking/booking.service';
+import { getActiveRideForDriver, listDriverHistory } from '../booking/booking.service';
 import * as driverService from './driver.service';
 
 export async function register(req: Request, res: Response) {
@@ -46,4 +46,8 @@ export async function access(req: Request, res: Response) {
 export async function getActiveRide(req: Request, res: Response) {
   const activeRide = await getActiveRideForDriver(req.auth!.sub);
   res.json({ activeRide });
+}
+
+export async function rideHistory(req: Request, res: Response) {
+  res.json(await listDriverHistory(req.auth!.sub));
 }
