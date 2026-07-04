@@ -1,5 +1,5 @@
 import { AppSettings, DEFAULT_BRANDING, DEFAULT_LOGOS, DEFAULT_THEME, normalizeAppSettings } from '@useme/shared';
-import { Schema, model, InferSchemaType } from 'mongoose';
+import { Schema, model, InferSchemaType, HydratedDocument } from 'mongoose';
 import { env } from '../config/env';
 
 const brandingSchema = new Schema(
@@ -55,7 +55,7 @@ const appSettingsSchema = new Schema(
   { timestamps: true },
 );
 
-export type AppSettingsDoc = InferSchemaType<typeof appSettingsSchema>;
+export type AppSettingsDoc = HydratedDocument<InferSchemaType<typeof appSettingsSchema>>;
 export const AppSettingsModel = model('AppSettings', appSettingsSchema);
 
 export async function getAppSettings(): Promise<AppSettingsDoc> {

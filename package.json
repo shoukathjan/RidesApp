@@ -14,7 +14,9 @@
     "backend": "npm run dev --workspace backend",
     "admin": "npm run dev --workspace admin-web",
     "customer": "npm run start --workspace customer-app",
-    "driver": "npm run start --workspace driver-app"
+    "driver": "npm run start --workspace driver-app",
+    "build": "npm run build --workspace shared && npm run build --workspace backend",
+    "start": "npm run start --workspace backend"
   },
   "overrides": {
     "react": "19.1.0",
