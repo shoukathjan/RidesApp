@@ -1,0 +1,27 @@
+{
+  "cli": {
+    "version": ">= 12.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://ridesapp-1nrq.onrender.com/api",
+        "EXPO_PUBLIC_SOCKET_URL": "https://ridesapp-1nrq.onrender.com"
+      }
+    },
+    "production": {
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://ridesapp-1nrq.onrender.com/api",
+        "EXPO_PUBLIC_SOCKET_URL": "https://ridesapp-1nrq.onrender.com"
+      }
+    }
+  }
+}

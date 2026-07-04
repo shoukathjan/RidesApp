@@ -19,6 +19,7 @@
       }
     },
     "android": {
+      "package": "com.getmeride.rider",
       "adaptiveIcon": {
         "foregroundImage": "./assets/app-icon.png",
         "backgroundColor": "#000000"
