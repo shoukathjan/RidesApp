@@ -7,6 +7,7 @@ import { api } from '../../api/client';
 import { colors, radii, spacing, typography } from '../../theme';
 import { PrimaryButton, ScreenHeader } from '../../theme/components';
 import { runPayment, WebViewPaymentRequired } from '../../payments';
+import { fixCheckoutUrl } from '../../payments/checkoutUrl';
 import { RootStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'SubscriptionPayment'>;
@@ -30,7 +31,7 @@ export default function SubscriptionPaymentScreen({ navigation, route }: Props) 
       } catch (err) {
         if (err instanceof WebViewPaymentRequired) {
           navigation.replace('SubscriptionCheckout', {
-            checkoutUrl: err.checkoutUrl,
+            checkoutUrl: fixCheckoutUrl(err.checkoutUrl),
             subscriptionId: order.subscriptionId,
             planName,
             durationDays,

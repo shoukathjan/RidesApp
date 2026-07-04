@@ -80,7 +80,15 @@ export default function SubscriptionCheckoutScreen({ navigation, route }: Props)
             if (done.current || verifying) return;
             Alert.alert(
               'Payment',
-              'Could not load checkout. Check Wi‑Fi and that backend is running.',
+              'Could not load checkout page. Check your internet connection and try again.',
+            );
+            navigation.goBack();
+          }}
+          onHttpError={() => {
+            if (done.current || verifying) return;
+            Alert.alert(
+              'Payment',
+              'Checkout page returned an error. Ensure Razorpay keys are set on the server.',
             );
             navigation.goBack();
           }}
