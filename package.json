@@ -1,0 +1,23 @@
+{
+  "name": "useme",
+  "version": "0.1.0",
+  "private": true,
+  "description": "UseMe — status-based ride-hailing platform (customer app, driver app, admin web, backend).",
+  "workspaces": [
+    "shared",
+    "backend",
+    "admin-web",
+    "customer-app",
+    "driver-app"
+  ],
+  "scripts": {
+    "backend": "npm run dev --workspace backend",
+    "admin": "npm run dev --workspace admin-web",
+    "customer": "npm run start --workspace customer-app",
+    "driver": "npm run start --workspace driver-app"
+  },
+  "overrides": {
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  }
+}
