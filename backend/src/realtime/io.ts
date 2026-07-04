@@ -34,6 +34,16 @@ export function emitRequestsRefresh(vehicleType: VehicleType): void {
     .emit(SocketEvents.RIDE_REQUESTS_REFRESH, { vehicleType });
 }
 
+/** Tell all online drivers that a request is no longer available. */
+export function emitRideRequestClaimed(
+  vehicleType: VehicleType,
+  bookingId: string,
+): void {
+  getIo()
+    .to(Rooms.requestsByVehicle(vehicleType))
+    .emit(SocketEvents.RIDE_REQUEST_CLAIMED, { vehicleType, bookingId });
+}
+
 /** Tell a specific driver a booking was assigned to them. */
 export function emitBookingAssigned(driverId: string, bookingId: string): void {
   getIo()

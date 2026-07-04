@@ -20,12 +20,14 @@ const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:4000/api';
 type AppConfigContextValue = {
   config: AppSettings;
   loading: boolean;
+  apiOnline: boolean;
   refresh: () => Promise<void>;
 };
 
 const AppConfigContext = createContext<AppConfigContextValue>({
   config: DEFAULT_APP_SETTINGS,
   loading: true,
+  apiOnline: true,
   refresh: async () => {},
 });
 
@@ -50,14 +52,17 @@ function applyThemeToDocument(config: AppSettings) {
 export function AppConfigProvider({ children }: { children: ReactNode }) {
   const [config, setConfig] = useState<AppSettings>(DEFAULT_APP_SETTINGS);
   const [loading, setLoading] = useState(true);
+  const [apiOnline, setApiOnline] = useState(true);
 
   const refresh = useCallback(async () => {
     try {
       const { data } = await api.get<Partial<AppSettings>>('/config');
       const merged = normalizeAppSettings(data);
       setConfig(merged);
+      setApiOnline(true);
       applyThemeToDocument(merged);
     } catch {
+      setApiOnline(false);
       const fallback = normalizeAppSettings(null);
       setConfig(fallback);
       applyThemeToDocument(fallback);
@@ -68,11 +73,13 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     void refresh();
+    const timer = window.setInterval(() => void refresh(), 15_000);
+    return () => window.clearInterval(timer);
   }, [refresh]);
 
   const value = useMemo(
-    () => ({ config, loading, refresh }),
-    [config, loading, refresh],
+    () => ({ config, loading, apiOnline, refresh }),
+    [config, loading, apiOnline, refresh],
   );
 
   return <AppConfigContext.Provider value={value}>{children}</AppConfigContext.Provider>;

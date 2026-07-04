@@ -2,6 +2,7 @@ import { ApprovalStatus, BookingStatus, DriverStatus, VehicleType, VEHICLE_TYPES
 import { AppSettingsModel, getAppSettings, serializeAppSettings } from '../../models/AppSettings';
 import { BookingModel } from '../../models/Booking';
 import { DriverModel } from '../../models/Driver';
+import { NotificationModel } from '../../models/Notification';
 import { FareConfigModel } from '../../models/FareConfig';
 import { SubscriptionModel } from '../../models/Subscription';
 import { SubscriptionPlanModel } from '../../models/SubscriptionPlan';
@@ -47,6 +48,37 @@ export async function setApproval(driverId: string, status: ApprovalStatus) {
   );
   if (!driver) throw notFound('Driver not found');
   return driver;
+}
+
+export async function deleteDriver(driverId: string) {
+  const driver = await DriverModel.findById(driverId);
+  if (!driver) throw notFound('Driver not found');
+
+  const [
+    { modifiedCount: cancelledBookings },
+    { deletedCount: deletedSubscriptions },
+  ] = await Promise.all([
+    BookingModel.updateMany(
+      {
+        claimedByDriverId: driverId,
+        status: {
+          $nin: [BookingStatus.RIDE_COMPLETED, BookingStatus.RIDE_CANCELLED],
+        },
+      },
+      { $set: { status: BookingStatus.RIDE_CANCELLED } },
+    ),
+    SubscriptionModel.deleteMany({ driverId }),
+    NotificationModel.deleteMany({ recipientId: driverId, recipientRole: 'driver' }),
+  ]);
+
+  await DriverModel.findByIdAndDelete(driverId);
+
+  return {
+    ok: true,
+    phone: driver.phone,
+    cancelledBookings,
+    deletedSubscriptions,
+  };
 }
 
 // ---- Subscription plans ----

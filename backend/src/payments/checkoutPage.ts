@@ -66,6 +66,27 @@ export function renderCheckoutHtml(params: {
       currency: ${JSON.stringify(currency)},
       name: ${JSON.stringify(name)},
       description: ${JSON.stringify(description)},
+      config: {
+        display: {
+          blocks: {
+            upi: {
+              name: 'Pay via UPI',
+              instruments: [{ method: 'upi' }],
+            },
+            others: {
+              name: 'Other payment methods',
+              instruments: [
+                { method: 'card' },
+                { method: 'netbanking' },
+                { method: 'wallet' },
+                { method: 'paylater' },
+              ],
+            },
+          },
+          sequence: ['block.upi', 'block.others'],
+          preferences: { show_default_blocks: true },
+        },
+      },
       handler: function (response) {
         redirectSuccess(response);
       },

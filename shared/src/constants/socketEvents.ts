@@ -20,6 +20,8 @@ export const SocketEvents = {
   BOOKING_ASSIGNED: 'booking:assigned',
   BOOKING_STATUS_UPDATED: 'booking:status_updated',
   RIDE_REQUESTS_REFRESH: 'requests:refresh',
+  /** A booking was claimed — remove it from every driver's feed immediately. */
+  RIDE_REQUEST_CLAIMED: 'requests:claimed',
   NOTIFICATION: 'notification',
 } as const;
 

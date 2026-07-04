@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api/client';
 import DataTable, { CellPrimary, CellSecondary } from '../components/DataTable';
 import PageHeader from '../components/PageHeader';
 import StatusBadge from '../components/StatusBadge';
+import Button from '../components/ui/Button';
 import {
   formatDateTime,
   formatPhone,
@@ -23,14 +24,37 @@ interface DriverRow {
 export default function Drivers() {
   const [drivers, setDrivers] = useState<DriverRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     setLoading(true);
     api
       .get<DriverRow[]>('/admin/drivers')
       .then((r) => setDrivers(r.data))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  async function remove(driver: DriverRow) {
+    const label = driver.name?.trim() || formatPhone(driver.phone);
+    if (
+      !window.confirm(
+        `Delete driver "${label}"?\n\nThis removes their account, subscriptions, and cancels any open rides. They can register again with the same phone.`,
+      )
+    ) {
+      return;
+    }
+    setDeletingId(driver._id);
+    try {
+      await api.delete(`/admin/drivers/${driver._id}`);
+      load();
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   const activeSubs = drivers.filter((d) =>
     subscriptionActive(d.subscriptionValidUntil),
@@ -88,6 +112,20 @@ export default function Drivers() {
             key: 'validUntil',
             header: 'Valid until',
             render: (d) => formatDateTime(d.subscriptionValidUntil),
+          },
+          {
+            key: 'actions',
+            header: 'Actions',
+            render: (d) => (
+              <Button
+                size="sm"
+                variant="danger"
+                disabled={deletingId === d._id}
+                onClick={() => remove(d)}
+              >
+                {deletingId === d._id ? 'Deleting…' : 'Delete'}
+              </Button>
+            ),
           },
         ]}
       />

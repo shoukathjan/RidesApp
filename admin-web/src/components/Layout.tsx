@@ -27,7 +27,7 @@ const links = [
 ];
 
 export default function Layout() {
-  const { config } = useAppConfig();
+  const { config, apiOnline } = useAppConfig();
   const { logout } = useAuth();
   const navigate = useNavigate();
 
@@ -85,6 +85,17 @@ export default function Layout() {
         <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-white to-brand-50/30">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(28,94,120,0.06),transparent_45%)]" />
           <div className="relative mx-auto max-w-7xl px-8 py-8">
+            {!apiOnline ? (
+              <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                Cannot reach the API at{' '}
+                <code className="rounded bg-amber-100 px-1.5 py-0.5">
+                  {import.meta.env.VITE_API_URL ?? 'http://localhost:4000/api'}
+                </code>
+                . Start the backend with <code className="rounded bg-amber-100 px-1.5 py-0.5">npm run backend</code>{' '}
+                or run both services with{' '}
+                <code className="rounded bg-amber-100 px-1.5 py-0.5">npm run dev:stack</code>.
+              </div>
+            ) : null}
             <Outlet />
           </div>
         </div>

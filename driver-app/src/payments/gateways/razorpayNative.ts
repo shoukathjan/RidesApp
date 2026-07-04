@@ -27,6 +27,12 @@ export const razorpayNativeGateway: PaymentGateway = {
       name: 'UseMe Driver Subscription',
       description: order.plan.name,
       theme: { color: '#1C5E78' },
+      method: {
+        upi: true,
+        card: true,
+        netbanking: true,
+        wallet: true,
+      },
     });
     return {
       subscriptionId: order.subscriptionId,

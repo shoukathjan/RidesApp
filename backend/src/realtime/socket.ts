@@ -1,4 +1,4 @@
-import { Rooms } from '@useme/shared';
+import { DriverStatus, Rooms } from '@useme/shared';
 import { Server as HttpServer } from 'http';
 import { Server } from 'socket.io';
 import { env } from '../config/env';
@@ -37,6 +37,7 @@ export function initSocket(httpServer: HttpServer): Server {
         socket.data.driverId = payload.sub;
         const driver = await DriverModel.findById(payload.sub).lean();
         socket.data.vehicleType = driver?.vehicleType;
+        socket.data.driverOnline = driver?.onlineStatus === DriverStatus.ONLINE;
       }
       return next();
     } catch {
@@ -52,6 +53,10 @@ export function initSocket(httpServer: HttpServer): Server {
     }
     if (role === 'driver' && driverId) {
       socket.join(Rooms.driver(driverId));
+      const vehicleType = socket.data.vehicleType as string | undefined;
+      if (vehicleType && socket.data.driverOnline) {
+        socket.join(Rooms.requestsByVehicle(vehicleType));
+      }
       registerDriverHandlers(socket);
       registerBookingHandlers(socket);
     }

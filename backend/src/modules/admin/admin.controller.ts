@@ -18,6 +18,10 @@ export async function rejectDriver(req: Request, res: Response) {
   res.json(await adminService.setApproval(req.params.id, ApprovalStatus.REJECTED));
 }
 
+export async function deleteDriver(req: Request, res: Response) {
+  res.json(await adminService.deleteDriver(req.params.id));
+}
+
 export async function listPlans(_req: Request, res: Response) {
   res.json(await adminService.listPlans());
 }

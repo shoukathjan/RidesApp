@@ -10,7 +10,7 @@ import {
 } from 'react';
 import { Alert } from 'react-native';
 import { api } from '../api/client';
-import { emitOffline, emitOnline } from '../realtime/socket';
+import { emitOffline, emitOnline, onSocketConnect } from '../realtime/socket';
 import { getCurrentCoordinates } from '../utils/location';
 import { useAuth } from './AuthContext';
 
@@ -48,6 +48,16 @@ export function OnlineStatusProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     syncFromServer();
   }, [syncFromServer]);
+
+  useEffect(() => {
+    if (!token) return;
+    return onSocketConnect(() => {
+      if (status !== DriverStatus.ONLINE) return;
+      getCurrentCoordinates().then((coords) => {
+        if (coords) emitOnline(coords);
+      });
+    });
+  }, [token, status]);
 
   async function goOnline(): Promise<boolean> {
     setBusy(true);

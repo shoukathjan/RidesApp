@@ -14,6 +14,7 @@ router.get('/dashboard', asyncHandler(controller.dashboard));
 router.get('/drivers', asyncHandler(controller.listDrivers));
 router.post('/drivers/:id/approve', asyncHandler(controller.approveDriver));
 router.post('/drivers/:id/reject', asyncHandler(controller.rejectDriver));
+router.delete('/drivers/:id', asyncHandler(controller.deleteDriver));
 
 // Subscription plans
 router.get('/plans', asyncHandler(controller.listPlans));

@@ -18,6 +18,7 @@ import { drivingDistanceKm } from '../places/providers/openrouteservice';
 import {
   emitBookingAssigned,
   emitBookingStatus,
+  emitRideRequestClaimed,
   emitRequestsRefresh,
 } from '../../realtime/io';
 import { badRequest, conflict, forbidden, notFound } from '../../utils/http';
@@ -231,7 +232,8 @@ export async function acceptBooking(driverId: string, bookingId: string) {
 
   emitBookingStatus(String(booking.customerId), bookingId, booking.status);
   emitBookingAssigned(driverId, bookingId);
-  emitRequestsRefresh(booking.vehicleType);
+  emitRideRequestClaimed(booking.vehicleType as VehicleType, bookingId);
+  emitRequestsRefresh(booking.vehicleType as VehicleType);
   return booking;
 }
 

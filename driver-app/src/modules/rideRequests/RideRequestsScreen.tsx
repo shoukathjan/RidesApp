@@ -3,7 +3,7 @@ import { CompositeScreenProps, useFocusEffect } from '@react-navigation/native';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import axios from 'axios';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Alert,
   FlatList,
@@ -20,9 +20,10 @@ import { useActiveRide } from '../../hooks/useActiveRide';
 import { colors, radii, spacing, typography } from '../../theme';
 import { PrimaryButton, ScreenHeader } from '../../theme/components';
 import { DriverTabParamList, RootStackParamList } from '../../navigation/types';
-import { onRequestsRefresh } from '../../realtime/socket';
+import { onRequestsRefresh, onRideRequestClaimed } from '../../realtime/socket';
 import { useOnlineStatus } from '../goOnlineOffline/useOnlineStatus';
 import { getCurrentCoordinates } from '../../utils/location';
+import { playRideRequestSound } from '../../utils/playRideRequestSound';
 
 type Props = CompositeScreenProps<
   BottomTabScreenProps<DriverTabParamList, 'RideRequests'>,
@@ -41,6 +42,8 @@ export default function RideRequestsScreen({ navigation }: Props) {
   const [locationDenied, setLocationDenied] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [rejected, setRejected] = useState<Set<string>>(new Set());
+  const knownRequestIds = useRef<Set<string>>(new Set());
+  const initialLoadDone = useRef(false);
 
   useEffect(() => {
     api
@@ -58,17 +61,19 @@ export default function RideRequestsScreen({ navigation }: Props) {
     });
   }, [activeRide, navigation]);
 
-  const load = useCallback(async (force = false) => {
+  const load = useCallback(async (force = false, notifyOnNew = false) => {
     const currentActive = await refreshActiveRide();
     if (currentActive) {
       setRequests([]);
       setLoadError(null);
+      knownRequestIds.current = new Set();
       return;
     }
 
     if (!force && !online) {
       setRequests([]);
       setLoadError(null);
+      knownRequestIds.current = new Set();
       return;
     }
 
@@ -90,6 +95,17 @@ export default function RideRequestsScreen({ navigation }: Props) {
         params: { lat: coords.lat, lng: coords.lng },
       });
       setRadiusKm(data.requestRadiusKm);
+
+      const nextIds = new Set(data.requests.map((r) => r._id));
+      if (
+        notifyOnNew &&
+        initialLoadDone.current &&
+        data.requests.some((r) => !knownRequestIds.current.has(r._id))
+      ) {
+        playRideRequestSound();
+      }
+      knownRequestIds.current = nextIds;
+      initialLoadDone.current = true;
       setRequests(data.requests);
     } catch (err) {
       setRequests([]);
@@ -111,8 +127,21 @@ export default function RideRequestsScreen({ navigation }: Props) {
 
   useEffect(() => {
     load();
-    const off = onRequestsRefresh(() => load(true));
-    return off;
+    const offRefresh = onRequestsRefresh(() => load(true, true));
+    const offClaimed = onRideRequestClaimed(({ bookingId }) => {
+      knownRequestIds.current.delete(bookingId);
+      setRequests((prev) => prev.filter((r) => r._id !== bookingId));
+      setRejected((prev) => {
+        if (!prev.has(bookingId)) return prev;
+        const next = new Set(prev);
+        next.delete(bookingId);
+        return next;
+      });
+    });
+    return () => {
+      offRefresh();
+      offClaimed();
+    };
   }, [load]);
 
   useFocusEffect(
@@ -135,6 +164,7 @@ export default function RideRequestsScreen({ navigation }: Props) {
     }
     try {
       await api.post(`/bookings/${item._id}/accept`);
+      knownRequestIds.current.delete(item._id);
       await refreshActiveRide();
       navigation.navigate('RideDetail', {
         bookingId: item._id,

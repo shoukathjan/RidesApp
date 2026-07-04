@@ -26,6 +26,7 @@ const DOC_LABELS: Record<string, string> = {
 export default function DriverApprovals() {
   const [drivers, setDrivers] = useState<DriverRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -44,6 +45,24 @@ export default function DriverApprovals() {
   async function decide(id: string, action: 'approve' | 'reject') {
     await api.post(`/admin/drivers/${id}/${action}`);
     load();
+  }
+
+  async function remove(driver: DriverRow) {
+    const label = driver.name?.trim() || formatPhone(driver.phone);
+    if (
+      !window.confirm(
+        `Delete driver "${label}"?\n\nThey can register again with the same phone after deletion.`,
+      )
+    ) {
+      return;
+    }
+    setDeletingId(driver._id);
+    try {
+      await api.delete(`/admin/drivers/${driver._id}`);
+      load();
+    } finally {
+      setDeletingId(null);
+    }
   }
 
   return (
@@ -110,12 +129,20 @@ export default function DriverApprovals() {
             key: 'actions',
             header: 'Action',
             render: (d) => (
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Button size="sm" onClick={() => decide(d._id, 'approve')}>
                   Approve
                 </Button>
-                <Button size="sm" variant="danger" onClick={() => decide(d._id, 'reject')}>
+                <Button size="sm" variant="secondary" onClick={() => decide(d._id, 'reject')}>
                   Reject
+                </Button>
+                <Button
+                  size="sm"
+                  variant="danger"
+                  disabled={deletingId === d._id}
+                  onClick={() => remove(d)}
+                >
+                  {deletingId === d._id ? 'Deleting…' : 'Delete'}
                 </Button>
               </div>
             ),
