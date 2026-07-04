@@ -24,7 +24,12 @@
         "foregroundImage": "./assets/app-icon.png",
         "backgroundColor": "#000000"
       },
-      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"],
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ],
       "softwareKeyboardLayoutMode": "pan"
     },
     "plugins": [
@@ -38,6 +43,11 @@
           "enableFullScreenImage_legacy": true
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "7befc2a9-1417-43c5-941a-222846c7b5c9"
+      }
+    }
   }
 }

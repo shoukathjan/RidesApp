@@ -3,6 +3,8 @@ dist/
 build/
 .expo/
 .expo-shared/
+android/
+ios/
 *.log
 .DS_Store
 .env

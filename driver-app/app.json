@@ -24,7 +24,12 @@
         "foregroundImage": "./assets/app-icon.png",
         "backgroundColor": "#000000"
       },
-      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "plugins": [
       "expo-location",
@@ -37,6 +42,11 @@
           "enableFullScreenImage_legacy": true
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "c5f7ca3a-480c-44b1-8f45-3bdfa41ac8ff"
+      }
+    }
   }
 }
